@@ -5,8 +5,6 @@ using UnityEngine.InputSystem;
 public class PlayerController: MonoBehaviour
 {
     [SerializeField]
-    private Transform muzzle;
-    [SerializeField]
     private Transform debugTransform;
     [SerializeField]
     private float playerSpeed = 2.0f;
@@ -14,8 +12,12 @@ public class PlayerController: MonoBehaviour
     private float jumpHeight = 1.0f;
     [SerializeField]
     private float rotationSpeed = 3.0f;
+    [SerializeField]
+    private float animationSmoothTime = 1f;
     
     private CharacterController controller;
+    private ItemSO rightHandItem;
+    private ItemSO leftHandItem;
     private Transform cam;
     private Animator animator;
     private PlayerInput playerInput;
@@ -25,9 +27,13 @@ public class PlayerController: MonoBehaviour
     private InputAction aimAction;
 
     private Vector3 playerVelocity;
+    private Vector2 animationBlend;
+    private Vector2 animationVelocity;
+
     private float gravityValue = -9.81f;
     private float turnSmoothTime = 0.2f;
     private float turnSmoothVelocity;
+
     private bool groundedPlayer;
     private bool aimMode = false;
     private void Awake()
@@ -35,39 +41,53 @@ public class PlayerController: MonoBehaviour
         controller = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
         animator = GetComponentInChildren<Animator>();
+
+
         cam = Camera.main.transform;
+
         moveAction = playerInput.actions["Move"];
         jumpAction = playerInput.actions["Jump"];
         shootAction = playerInput.actions["Shoot"];
         aimAction = playerInput.actions["Aim"];
+
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void OnEnable()
     {
-        shootAction.performed += _ => Shoot();
+        shootAction.performed += _ => UseEquippedItem();
         aimAction.performed += _ => LookForward();
         aimAction.canceled += _ => LookForward();
     }
 
     private void OnDisable()
     {
-        shootAction.performed -= _ => Shoot();
+        shootAction.performed -= _ => UseEquippedItem();
         aimAction.performed -= _ => LookForward();
         aimAction.canceled -= _ => LookForward();
     }
 
     void Update()
     {
+        // Is Grounded?
         groundedPlayer = controller.isGrounded;
         if (groundedPlayer && playerVelocity.y < 0)
         {
             playerVelocity.y = 0f;
         }
+
+        // Movement Input
         Vector2 input = moveAction.ReadValue<Vector2>();
+        animationBlend = Vector2.SmoothDamp(animationBlend,input,ref animationVelocity,animationSmoothTime);
+        Vector3 move = new Vector3(animationBlend.x, 0, animationBlend.y).normalized;
 
-        Vector3 move = new Vector3(input.x, 0, input.y).normalized;
+        // Animation Parameters
+        animator.SetFloat("XSpeed", move.x);
+        animator.SetFloat("ZSpeed", move.z);
+        animator.SetFloat("Magnitude", move.magnitude);
+        animator.SetBool("Aiming", aimMode);
 
+        // Process Movement and Rotation 
         if (aimMode)
         {
             aimMovement(move);
@@ -99,7 +119,7 @@ public class PlayerController: MonoBehaviour
     {
         float targetAngle = Mathf.Atan2(move.x, move.z) * Mathf.Rad2Deg;
         float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y,targetAngle,ref turnSmoothVelocity,turnSmoothTime);
-        transform.rotation = Quaternion.Euler(0f, angle, 0f);
+        transform.rotation = Quaternion.Euler(0f, targetAngle, 0f);
 
         controller.Move(move * playerSpeed * Time.deltaTime);
     }
@@ -116,18 +136,8 @@ public class PlayerController: MonoBehaviour
 
     }
 
-    private void Shoot()
+    private void UseEquippedItem()
     {
-        Vector2 screenCenterPoint = new Vector2(Screen.width/2,Screen.height/2);
-        Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray,out hit, Mathf.Infinity))
-        {
-            if(debugTransform!= null)
-            {
-                debugTransform.position = hit.point;
-            }
-        }
+        
     }
 }
