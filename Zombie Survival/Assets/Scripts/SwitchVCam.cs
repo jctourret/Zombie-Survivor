@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using Cinemachine;
 
 public class SwitchVCam : MonoBehaviour
@@ -8,13 +9,17 @@ public class SwitchVCam : MonoBehaviour
     private PlayerInput playerInput;
     [SerializeField]
     private int priorityBoostAmmount = 10;
+    [SerializeField]
+    private CinemachineVirtualCamera aimVCam;
+    [SerializeField]
+    private Canvas ThirdPCanvas;
+    [SerializeField]
+    private Canvas aimCanvas;
 
-    private CinemachineVirtualCamera vCam;
     private InputAction aimAction;
 
     private void Awake()
     {
-        vCam = GetComponent<CinemachineVirtualCamera>();
         aimAction = playerInput.actions["Aim"];
     }
 
@@ -32,11 +37,15 @@ public class SwitchVCam : MonoBehaviour
 
     private void StartAim()
     {
-        vCam.Priority += priorityBoostAmmount;
+        aimVCam.Priority += priorityBoostAmmount;
+        aimCanvas.enabled = true;
+        ThirdPCanvas.enabled = false;
     }
 
     private void StopAim()
     {
-        vCam.Priority -= priorityBoostAmmount;
+        aimVCam.Priority -= priorityBoostAmmount;
+        aimCanvas.enabled = false;
+        ThirdPCanvas.enabled = true;
     }
 }
