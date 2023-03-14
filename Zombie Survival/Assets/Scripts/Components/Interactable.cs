@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class Interactable : MonoBehaviour
 {
-    public float interactionRadius;
-
-    public virtual void Interact(Actor interactor, InventorySO inventory)
+    public virtual void Interact(Actor interactor)
     {
-        Debug.Log("Interactor "+ interactor.name + " has interacted with " + gameObject.name);
+        Debug.Log("Interactor " + interactor.name + " has interacted with " + gameObject.name);
+
     }
 }

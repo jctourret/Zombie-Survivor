@@ -7,6 +7,8 @@ public class PlayerController: Actor
     [SerializeField]
     private Transform debugTransform;
     [SerializeField]
+    private float interactionRange = 1f;
+    [SerializeField]
     private float playerSpeed = 2.0f;
     [SerializeField]
     private float jumpHeight = 1.0f;
@@ -14,10 +16,8 @@ public class PlayerController: Actor
     private float rotationSpeed = 3.0f;
     [SerializeField]
     private float animationSmoothTime = 1f;
-    
-    private CharacterController controller;
 
-    private InventorySO inventory;
+    private CharacterController controller;
     private ItemSO rightHandItem;
     private ItemSO leftHandItem;
 
@@ -27,6 +27,7 @@ public class PlayerController: Actor
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction shootAction;
+    private InputAction interactAction;
     private InputAction aimAction;
 
     private Vector3 playerVelocity;
@@ -45,12 +46,14 @@ public class PlayerController: Actor
         playerInput = GetComponent<PlayerInput>();
         animator = GetComponentInChildren<Animator>();
 
+        inventory = Resources.Load<InventorySO>("System/Player Inventory");
 
         cam = Camera.main.transform;
 
         moveAction = playerInput.actions["Move"];
         jumpAction = playerInput.actions["Jump"];
         shootAction = playerInput.actions["Shoot"];
+        interactAction = playerInput.actions["Interact"];
         aimAction = playerInput.actions["Aim"];
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -59,6 +62,7 @@ public class PlayerController: Actor
     private void OnEnable()
     {
         shootAction.performed += _ => UseEquippedItem();
+        interactAction.performed += _ => Interact();
         aimAction.performed += _ => LookForward();
         aimAction.canceled += _ => LookForward();
     }
@@ -111,6 +115,15 @@ public class PlayerController: Actor
 
         playerVelocity.y += gravityValue * Time.deltaTime;
         controller.Move(playerVelocity * Time.deltaTime);
+        // Debug Interaction aim
+        RaycastHit hit;
+        Vector2 screenCenterPoint = new Vector2(Screen.width/2f,Screen.height/2f);
+        Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+
+        if(Physics.Raycast(ray, out hit, Mathf.Infinity))
+        {
+            debugTransform.position = hit.point;
+        }
     }
 
     private void LookForward()
@@ -138,9 +151,25 @@ public class PlayerController: Actor
         controller.Move(move * Time.deltaTime * playerSpeed);
 
     }
+    private void Interact()
+    {
+        RaycastHit hit;
+        Vector2 screenCenterPoint = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        Ray ray = Camera.main.ScreenPointToRay(screenCenterPoint);
+
+        if (Physics.Raycast(ray, out hit, interactionRange))
+        {
+            Debug.Log("Player tried to interact with " + hit.collider.name);
+            Interactable interactable = hit.collider.GetComponent<Interactable>();
+            if(interactable != null)
+            {
+                interactable.Interact(this);
+            }
+        }
+    }
 
     private void UseEquippedItem()
     {
-        
+
     }
 }

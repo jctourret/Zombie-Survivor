@@ -7,16 +7,20 @@ public class ItemPickup : Interactable
 {
     public ItemSO item;
     
-    public event Action<ItemPickup> OnItemPickUp;
-    public override void Interact(Actor interactor, InventorySO inventory)
+    public event Action<ItemPickup,Actor> OnItemPickUp;
+    public override void Interact(Actor interactor)
     {
-        base.Interact(interactor,inventory);
-        inventory.Add(item);
+        base.Interact(interactor);
+        PickUp(interactor);
     }
 
-    public void PickUp()
+    public void PickUp(Actor pickUpper)
     {
-        OnItemPickUp?.Invoke(this);
+        if(pickUpper.inventory != null)
+        {
+            pickUpper.inventory.Add(item);
+        }
+        OnItemPickUp?.Invoke(this,pickUpper);
         Destroy(gameObject);
     }
 }

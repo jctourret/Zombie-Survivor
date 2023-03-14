@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83aac5655432c694db2e1634e626f06c, type: 3}
-  m_Name: Pistol
+  m_Name: TestItem
   m_EditorClassIdentifier: 
   ItemId: 0
-  name: Pistol
-  icon: {fileID: 21300000, guid: ca11500585669894eb8aea5a5a470001, type: 3}
+  name: TestItem
+  icon: {fileID: 0}
