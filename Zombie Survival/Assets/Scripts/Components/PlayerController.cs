@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController),typeof(PlayerInput))]
-public class PlayerController: MonoBehaviour
+public class PlayerController: Actor
 {
     [SerializeField]
     private Transform debugTransform;
@@ -16,8 +16,11 @@ public class PlayerController: MonoBehaviour
     private float animationSmoothTime = 1f;
     
     private CharacterController controller;
+
+    private InventorySO inventory;
     private ItemSO rightHandItem;
     private ItemSO leftHandItem;
+
     private Transform cam;
     private Animator animator;
     private PlayerInput playerInput;
