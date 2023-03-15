@@ -16,11 +16,10 @@ public class ItemPickup : Interactable
 
     public void PickUp(Actor pickUpper)
     {
-        if(pickUpper.inventory != null)
+        if(pickUpper.inventory != null && pickUpper.inventory.Add(item))
         {
-            pickUpper.inventory.Add(item);
+            OnItemPickUp?.Invoke(this, pickUpper);
+            Destroy(gameObject);
         }
-        OnItemPickUp?.Invoke(this,pickUpper);
-        Destroy(gameObject);
     }
 }
